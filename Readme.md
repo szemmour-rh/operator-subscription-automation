@@ -17,7 +17,7 @@ In OpenShift, Operators installed via OLM (Operator Lifecycle Manager) can be co
 ## 🚀 What It Does
 
 - Deploys two CronJobs in a dedicated namespace:
-  - `set-subscriptions-manual` — enforces `Manual` mode during working hours
+  - `set-subscriptions-manual`    — enforces `Manual` mode during working hours
   - `set-subscriptions-automatic` — sets `Automatic` mode after hours and on weekends
 - Uses a dedicated **ServiceAccount** with minimal `RBAC` to patch `Subscription` resources cluster-wide
 - Based on the `ose-cli` container image for access to `oc`
@@ -26,13 +26,13 @@ In OpenShift, Operators installed via OLM (Operator Lifecycle Manager) can be co
 
 ## 📁 Project Structure
 
-├── namespace.yaml                    # Namespace for automation
+├── namespace.yaml                    
 
-├── rbac.yaml                         # ServiceAccount, ClusterRole, and Binding
+├── rbac.yaml                         
 
-├── patch-subscriptions-manual.yaml   # CronJob: Manual mode during weekdays
+├── patch-subscriptions-manual.yaml    
 
-├── patch-subscriptions-automatic.yaml # CronJob: Automatic mode after hours/weekends
+├── patch-subscriptions-automatic.yaml 
 
 
 
