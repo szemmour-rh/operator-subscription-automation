@@ -1,0 +1,36 @@
+#Runs at 6:00 PM and the config is the same duing the weekend
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: set-subscriptions-automatic
+  namespace: operator-subscription-automation
+spec:
+  schedule: "0 18 * * 1-5"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: operator-subscription-automation-sa
+          containers:
+          - name: patch-automatic
+            image: registry.redhat.io/openshift4/ose-cli:v4.15
+            command:
+              - /bin/bash
+              - -c
+              - |
+                echo "Setting Subscriptions to AUTOMATIC"
+                subs=$(oc get subscriptions --all-namespaces -o jsonpath='{range .items[*]}{.metadata.namespace}{";"}{.metadata.name}{"\n"}{end}')
+                for sub in $subs; do
+                  ns=$(echo $sub | cut -d';' -f1)
+                  name=$(echo $sub | cut -d';' -f2)
+                  echo "Patching subscription $name in $ns to Automatic"
+                  oc patch subscription "$name" -n "$ns" --type merge -p '{"spec":{"installPlanApproval":"Automatic"}}'
+                done
+            resources:
+              limits:
+                memory: 256Mi
+                cpu: 500m
+              requests:
+                memory: 128Mi
+                cpu: 100m
+          restartPolicy: OnFailure
