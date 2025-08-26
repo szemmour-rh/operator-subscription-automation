@@ -27,8 +27,11 @@ In OpenShift, Operators installed via OLM (Operator Lifecycle Manager) can be co
 ## 📁 Project Structure
 
 ├── namespace.yaml                    # Namespace for automation
+
 ├── rbac.yaml                         # ServiceAccount, ClusterRole, and Binding
+
 ├── patch-subscriptions-manual.yaml   # CronJob: Manual mode during weekdays
+
 ├── patch-subscriptions-automatic.yaml # CronJob: Automatic mode after hours/weekends
 
 
