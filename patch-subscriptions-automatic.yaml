@@ -1,4 +1,3 @@
-#Runs at 6:00 PM and the config is the same duing the weekend
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -18,6 +17,46 @@ spec:
               - /bin/bash
               - -c
               - |
+                # 1. Get Current Version
+                CURRENT_VER=$(oc get clusterversion version -o jsonpath='{.status.desired.version}')
+                # Extract Major.Minor (e.g., 4.15)
+                CURRENT_MINOR=$(echo "$CURRENT_VER" | cut -d. -f1,2)
+                
+                echo "Detected Cluster Version: $CURRENT_VER (Minor: $CURRENT_MINOR)"
+
+                # 2. Determine the Threshold based on the list provided
+                THRESHOLD=""
+                case $CURRENT_MINOR in
+                  "4.20") THRESHOLD="4.20.0" ;;
+                  "4.19") THRESHOLD="4.19.10" ;;
+                  "4.18") THRESHOLD="4.18.23" ;;
+                  "4.17") THRESHOLD="4.17.39" ;;
+                  "4.16") THRESHOLD="4.16.48" ;;
+                  "4.15") THRESHOLD="4.15.58" ;;
+                  "4.14") THRESHOLD="4.14.57" ;;
+                  "4.12") THRESHOLD="4.12.81" ;;
+                esac
+
+                # 3. Compare Logic
+                if [ -n "$THRESHOLD" ]; then
+                  echo "Minimum required version for $CURRENT_MINOR is $THRESHOLD"
+                  
+                  # Use sort -V to compare versions correctly
+                  # If the lowest of the two is CURRENT_VER, and they are not equal, then CURRENT < THRESHOLD
+                  LOWEST=$(echo -e "$CURRENT_VER\n$THRESHOLD" | sort -V | head -n1)
+                  
+                  if [ "$LOWEST" == "$CURRENT_VER" ] && [ "$CURRENT_VER" != "$THRESHOLD" ]; then
+                    echo "Current version $CURRENT_VER is BELOW the threshold $THRESHOLD."
+                    echo "Stopping script to keep subscriptions MANUAL."
+                    exit 0
+                  else
+                    echo "Current version $CURRENT_VER is equal to or greater than $THRESHOLD. Proceeding..."
+                  fi
+                else
+                  echo "No restriction found for version family $CURRENT_MINOR. Proceeding..."
+                fi
+
+                # 4. Standard Patch Logic
                 echo "Setting Subscriptions to AUTOMATIC"
                 subs=$(oc get subscriptions --all-namespaces -o jsonpath='{range .items[*]}{.metadata.namespace}{";"}{.metadata.name}{"\n"}{end}')
                 for sub in $subs; do
