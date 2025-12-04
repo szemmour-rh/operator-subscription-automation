@@ -18,7 +18,8 @@ In OpenShift, Operators installed via OLM (Operator Lifecycle Manager) can be co
 
 - Deploys two CronJobs in a dedicated namespace:
   - `set-subscriptions-manual`    — enforces `Manual` mode during working hours
-  - `set-subscriptions-automatic` — sets `Automatic` mode after hours and on weekends ater it verifies the current OpenShift version against a defined "Safe List" (e.g., > 4.15.58). If the cluster is below the threshold, it aborts the update to "automatic" in order to avoid the risk that customers may not upgrade their OCP clusters in time, leading to potential compatibility issues. More details here: OCPSTRAT-2593
+  - `set-subscriptions-automatic` — sets `Automatic` mode after hours and on weekends ater it verifies the current OpenShift version against a defined "Safe List" (e.g., > 4.15.58). If the cluster is below the threshold, it aborts the update to "automatic" in order to avoid the risk that customers may not upgrade their OCP clusters in time, leading to potential compatibility issues. More details here: OCPSTRAT-2593. The list of minimal cluster version is provided in this kcs: https://access.redhat.com/articles/7133113
+  
 - Uses a dedicated **ServiceAccount** with minimal `RBAC` to patch `Subscription` resources cluster-wide
 - Based on the `ose-cli` container image for access to `oc`
 
